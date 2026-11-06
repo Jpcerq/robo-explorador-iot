@@ -1,5 +1,36 @@
 # Robô explorador — controle Velxio, ESP32 físico e telemetria
 
+Exploration robot built for an IoT course at SENAI CIMATEC. A simulated ESP32-S3 controller publishes commands over MQTT to a physical ESP32-S3.
+The physical board drives a servo, reads temperature, humidity, light and distance sensors, and sends telemetry over HTTP to a Flask API backed by SQLite.
+Servo control and telemetry delivery were validated on hardware. The rest of this document is in Portuguese.
+
+**Team:** João Pedro Cerqueira Guimarães and Pedro Medeiros Prietto
+
+```mermaid
+flowchart LR
+    subgraph Sim[Velxio simulator]
+        C[ESP32-S3 controller<br/>joystick and button]
+    end
+    B[(MQTT broker<br/>HiveMQ)]
+    subgraph Robot[Physical robot]
+        E[ESP32-S3]
+        SV[Servo]
+        SN[DHT11, ultrasonic, LDR]
+    end
+    subgraph Backend[Computer on the local network]
+        F[Flask API]
+        D[(SQLite)]
+    end
+
+    C -- commands --> B
+    B -- commands --> E
+    E -- status --> B
+    E -- PWM --> SV
+    SN -- readings --> E
+    E -- HTTP POST /leituras --> F
+    F --> D
+```
+
 Projeto das etapas 01, 02 e 03: o controle simulado no Velxio publica comandos MQTT; o ESP32-S3 físico aciona o servo, lê os sensores e envia as leituras para uma API Flask com SQLite.
 
 ## Arquivos que devem ser usados
