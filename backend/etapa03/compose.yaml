@@ -1,0 +1,88 @@
+name: pintura-etapa03
+services:
+  influxdb:
+    image: influxdb:2.9.1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUXDB_USERNAME:?Execute python configurar.py}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUXDB_PASSWORD:?Execute python configurar.py}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_ADMIN_TOKEN:?Execute python configurar.py}
+      DOCKER_INFLUXDB_INIT_ORG: fabrica
+      DOCKER_INFLUXDB_INIT_BUCKET: pintura
+      DOCKER_INFLUXDB_INIT_RETENTION: 30d
+    volumes:
+      - influx-data:/var/lib/influxdb2
+      - influx-config:/etc/influxdb2
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+
+  preparar-tokens:
+    image: pintura-etapa03-api:local
+    build: .
+    command: ["python", "-m", "backend.bootstrap"]
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    environment:
+      INFLUXDB_ADMIN_TOKEN: ${INFLUXDB_ADMIN_TOKEN:?Execute python configurar.py}
+    volumes:
+      - influx-tokens:/credentials
+    restart: "no"
+
+  api:
+    image: pintura-etapa03-api:local
+    build: .
+    restart: unless-stopped
+    depends_on:
+      preparar-tokens:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      API_KEY: ${API_KEY:?Execute python configurar.py}
+      INFLUXDB_TOKEN_FILE: /credentials/write.token
+      INFLUXDB_ORG: fabrica
+      INFLUXDB_BUCKET: pintura
+    volumes:
+      - influx-tokens:/credentials:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+
+  grafana:
+    image: grafana/grafana:13.3.0
+    restart: unless-stopped
+    depends_on:
+      preparar-tokens:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - 'export INFLUXDB_READ_TOKEN="$$(cat /credentials/read.token)"; exec /run.sh'
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USERNAME:?Execute python configurar.py}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?Execute python configurar.py}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_DASHBOARDS_MIN_REFRESH_INTERVAL: 2s
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/pintura.json
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - influx-tokens:/credentials:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+
+volumes:
+  influx-data:
+  influx-config:
+  influx-tokens:
+  grafana-data:

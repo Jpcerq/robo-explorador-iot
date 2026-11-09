@@ -1,0 +1,10 @@
+{
+  "versao": 1,
+  "sequencia": 1,
+  "nivel_tinta": 75.0,
+  "temperatura": 24.0,
+  "umidade": 55.0,
+  "luminosidade": 680,
+  "timestamp": 2000,
+  "relogio": "uptime_ms"
+}

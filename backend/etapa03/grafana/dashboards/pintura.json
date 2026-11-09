@@ -1,0 +1,999 @@
+{
+  "id": null,
+  "uid": "pintura-etapa03",
+  "title": "Pintura de blocos | Etapa 03",
+  "tags": [
+    "IoT",
+    "ESP32",
+    "Etapa 03"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "2s",
+  "editable": true,
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "2s",
+      "5s",
+      "10s",
+      "30s",
+      "1m"
+    ]
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "dispositivo",
+        "label": "Dispositivo",
+        "type": "custom",
+        "query": "ESP32 real : esp32-s3-fabrica, Demonstração : esp32-s3-demo",
+        "current": {
+          "selected": true,
+          "text": "ESP32 real",
+          "value": "esp32-s3-fabrica"
+        },
+        "options": [
+          {
+            "selected": true,
+            "text": "ESP32 real",
+            "value": "esp32-s3-fabrica"
+          },
+          {
+            "selected": false,
+            "text": "Demonstração",
+            "value": "esp32-s3-demo"
+          }
+        ],
+        "includeAll": false,
+        "multi": false,
+        "hide": 0,
+        "skipUrlSync": false
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Nível de tinta",
+      "type": "gauge",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 20
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: -10s)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 1)\n  |> filter(fn: (r) => exists r.nivel_tinta)\n  |> map(fn: (r) => ({_time: r._time, _value: r.nivel_tinta}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 2,
+      "title": "Temperatura",
+      "type": "gauge",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 0,
+        "w": 4,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": -40,
+          "max": 80
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: -10s)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 1)\n  |> filter(fn: (r) => exists r.temperatura)\n  |> map(fn: (r) => ({_time: r._time, _value: r.temperatura}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 3,
+      "title": "Umidade",
+      "type": "gauge",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 4,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: -10s)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 1)\n  |> filter(fn: (r) => exists r.umidade)\n  |> map(fn: (r) => ({_time: r._time, _value: r.umidade}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 4,
+      "title": "Luminosidade (ADC)",
+      "type": "gauge",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 4,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "max": 4095
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: -10s)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 1)\n  |> filter(fn: (r) => exists r.luminosidade)\n  |> map(fn: (r) => ({_time: r._time, _value: r.luminosidade}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 5,
+      "title": "Presença",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 4,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Ausente",
+                  "color": "blue"
+                },
+                "1": {
+                  "text": "Detectada",
+                  "color": "orange"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: -10s)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 1)\n  |> filter(fn: (r) => exists r.presenca)\n  |> map(fn: (r) => ({_time: r._time, _value: r.presenca}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "description": "O transmissor fornecido não envia presenca. Sem leitura não significa ausência."
+    },
+    {
+      "id": 6,
+      "title": "Última recepção há",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 20,
+        "y": 0,
+        "w": 4,
+        "h": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: -30d, stop: now())\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> filter(fn: (r) => r._field == \"sequencia\")\n  |> last()\n  |> map(fn: (r) => ({_time: now(), _value: float(v: int(v: now()) - int(v: r._time)) / 1000000000.0}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      },
+      "description": "Data de chegada ao PC. Verde até 5 s; vermelho acima desse intervalo. Sem leitura após retenção."
+    },
+    {
+      "id": 7,
+      "title": "Histórico do nível de tinta",
+      "type": "timeseries",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> filter(fn: (r) => r._field == \"nivel_tinta\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"nivel_tinta\")"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Temperatura e umidade",
+      "type": "timeseries",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "celsius"
+              },
+              {
+                "id": "displayName",
+                "value": "Temperatura"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "displayName",
+                "value": "Umidade"
+              },
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> filter(fn: (r) => r._field == \"temperatura\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"temperatura\")"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> filter(fn: (r) => r._field == \"umidade\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"umidade\")"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "title": "Histórico da luminosidade (ADC bruto)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "max": 4095,
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> filter(fn: (r) => r._field == \"luminosidade\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"luminosidade\")"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Histórico de presença",
+      "type": "timeseries",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 13,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "min": 0,
+          "max": 1,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "Ausente",
+                  "color": "blue"
+                },
+                "1": {
+                  "text": "Detectada",
+                  "color": "orange"
+                }
+              }
+            }
+          ],
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> filter(fn: (r) => r._field == \"presenca\")\n  |> aggregateWindow(every: v.windowPeriod, fn: last, createEmpty: false)\n  |> yield(name: \"presenca\")"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Falhas no último pacote",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: -10s)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 1)\n  |> filter(fn: (r) => exists r.falhas_sensores)\n  |> map(fn: (r) => ({_time: r._time, _value: r.falhas_sensores}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "id": 12,
+      "title": "Sequência recebida",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 21,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: -10s)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 1)\n  |> filter(fn: (r) => exists r.sequencia)\n  |> map(fn: (r) => ({_time: r._time, _value: r.sequencia}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "id": 13,
+      "title": "Tempo do ESP32 desde o boot",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 21,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: -10s)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 1)\n  |> filter(fn: (r) => exists r.uptime_ms)\n  |> map(fn: (r) => ({_time: r._time, _value: r.uptime_ms}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "id": 14,
+      "title": "Dado de presença disponível",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influx-pintura"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 21,
+        "w": 6,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 1,
+          "noValue": "Sem leitura",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "false": {
+                  "text": "Não enviado",
+                  "color": "gray"
+                },
+                "true": {
+                  "text": "Disponível",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influx-pintura"
+          },
+          "query": "from(bucket: v.defaultBucket)\n  |> range(start: -10s)\n  |> filter(fn: (r) => r._measurement == \"pintura\" and r.dispositivo == \"${dispositivo}\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group(columns: [])\n  |> sort(columns: [\"_time\"], desc: true)\n  |> limit(n: 1)\n  |> filter(fn: (r) => exists r.presenca_disponivel)\n  |> map(fn: (r) => ({_time: r._time, _value: r.presenca_disponivel}))"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto"
+      }
+    },
+    {
+      "id": 15,
+      "type": "text",
+      "title": "Como interpretar os dados",
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 24,
+        "h": 4
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "Atualização a cada **2 segundos**. Indicadores atuais usam apenas o último pacote dos últimos **10 s**. Horário do gráfico = **recepção UTC no computador**; o uptime original permanece salvo. O firmware real não envia presença: **Sem leitura** é esperado. ADC bruto não representa lux. Dados do dispositivo **esp32-s3-demo** são artificiais. Falhas `null` não são convertidas em zero."
+      }
+    }
+  ]
+}
