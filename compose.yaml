@@ -1,0 +1,37 @@
+services:
+  influxdb:
+    image: influxdb:2.9.1
+    ports:
+      - "127.0.0.1:8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUX_ADMIN_USER}
+      DOCKER_INFLUXDB_INIT_PASSWORD: "${INFLUX_ADMIN_PASSWORD:?Preencha INFLUX_ADMIN_PASSWORD no arquivo .env}"
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_ADMIN_TOKEN}
+      DOCKER_INFLUXDB_INIT_ORG: ${INFLUX_ORG}
+      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUX_BUCKET}
+      DOCKER_INFLUXDB_INIT_RETENTION: 30d
+    volumes:
+      - influx_dados:/var/lib/influxdb2
+      - influx_config:/etc/influxdb2
+    healthcheck:
+      test: ["CMD", "influx", "ping", "--host", "http://127.0.0.1:8086"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  api:
+    build: ./backend
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    ports:
+      - "${API_BIND_IP:-127.0.0.1}:8000:8000"
+    environment:
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_ORG: ${INFLUX_ORG}
+      INFLUX_BUCKET: ${INFLUX_BUCKET}
+      INFLUX_API_TOKEN: ${INFLUX_API_TOKEN:-}
+      API_TOKEN: ${API_TOKEN}
+volumes:
+  influx_dados:
+  influx_config:
