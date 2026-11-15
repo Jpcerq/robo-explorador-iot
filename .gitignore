@@ -1,0 +1,17 @@
+# Segredos e configuração local
+.env
+backend/config_local.json
+backend/ACESSO_BANCO.txt
+backend/ARDUINO_CLOUD.txt
+
+# InfluxDB nativo (baixado e dados gerados pelo iniciar_banco.bat)
+backend/influxdb/
+backend/dados-influx/
+backend/*.zip
+backend/iniciar_banco.log
+
+# Python
+__pycache__/
+
+# Cópias de segurança
+*.bak
